@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{9D8680C4-DBE2-497A-8F20-49B7C4A082CF}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="GLGCMain.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="_Test_GLGC.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="GLGCMain">
+			<MSBuild Projects="GLGCMain.dproj"/>
+		</Target>
+		<Target Name="GLGCMain:Clean">
+			<MSBuild Projects="GLGCMain.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="GLGCMain:Make">
+			<MSBuild Projects="GLGCMain.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="_Test_GLGC">
+			<MSBuild Projects="_Test_GLGC.dproj"/>
+		</Target>
+		<Target Name="_Test_GLGC:Clean">
+			<MSBuild Projects="_Test_GLGC.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="_Test_GLGC:Make">
+			<MSBuild Projects="_Test_GLGC.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="GLGCMain;_Test_GLGC"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="GLGCMain:Clean;_Test_GLGC:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="GLGCMain:Make;_Test_GLGC:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>
