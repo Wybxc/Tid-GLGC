@@ -5,13 +5,12 @@ program GLGCMain;
 
 uses
   System.SysUtils,
-  Tid.GCObject in 'Tid.GCObject.pas',
-  Tid.LinkedList in 'Tid.LinkedList.pas';
+  Tid.GCObject in 'Tid.GCObject.pas';
 
 begin
   ReportMemoryLeaksOnShutdown := True;
   try
-    Witeln('GLGC Ver 0.0');
+    Writeln('GLGC Ver 0.0');
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

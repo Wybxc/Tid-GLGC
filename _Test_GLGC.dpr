@@ -16,11 +16,13 @@ program _Test_GLGC;
 
 uses
   DunitTestRunner,
-  _Test.LinkedList in '_Test.LinkedList.pas';
+  _Test.TGCObjectList in '_Test\_Test.TGCObjectList.pas',
+  Tid.GCObject in 'Tid.GCObject.pas';
 
 {$R *.RES}
 
 begin
+  ReportMemoryLeaksOnShutdown := True;
   DunitTestRunner.RunRegisteredTests;
   Readln;
 end.

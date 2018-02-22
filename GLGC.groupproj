@@ -9,6 +9,9 @@
 			<Projects Include="_Test_GLGC.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="_Test_Futures.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -21,28 +24,37 @@
 			<MSBuild Projects="GLGCMain.dproj"/>
 		</Target>
 		<Target Name="GLGCMain:Clean">
-			<MSBuild Projects="GLGCMain.dproj" Targets="Clean"/>
+			<MSBuild Targets="Clean" Projects="GLGCMain.dproj"/>
 		</Target>
 		<Target Name="GLGCMain:Make">
-			<MSBuild Projects="GLGCMain.dproj" Targets="Make"/>
+			<MSBuild Targets="Make" Projects="GLGCMain.dproj"/>
 		</Target>
 		<Target Name="_Test_GLGC">
 			<MSBuild Projects="_Test_GLGC.dproj"/>
 		</Target>
 		<Target Name="_Test_GLGC:Clean">
-			<MSBuild Projects="_Test_GLGC.dproj" Targets="Clean"/>
+			<MSBuild Targets="Clean" Projects="_Test_GLGC.dproj"/>
 		</Target>
 		<Target Name="_Test_GLGC:Make">
-			<MSBuild Projects="_Test_GLGC.dproj" Targets="Make"/>
+			<MSBuild Targets="Make" Projects="_Test_GLGC.dproj"/>
+		</Target>
+		<Target Name="_Test_Futures">
+			<MSBuild Projects="_Test_Futures.dproj"/>
+		</Target>
+		<Target Name="_Test_Futures:Clean">
+			<MSBuild Targets="Clean" Projects="_Test_Futures.dproj"/>
+		</Target>
+		<Target Name="_Test_Futures:Make">
+			<MSBuild Targets="Make" Projects="_Test_Futures.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="GLGCMain;_Test_GLGC"/>
+			<CallTarget Targets="GLGCMain;_Test_GLGC;_Test_Futures"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="GLGCMain:Clean;_Test_GLGC:Clean"/>
+			<CallTarget Targets="GLGCMain:Clean;_Test_GLGC:Clean;_Test_Futures:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="GLGCMain:Make;_Test_GLGC:Make"/>
+			<CallTarget Targets="GLGCMain:Make;_Test_GLGC:Make;_Test_Futures:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
