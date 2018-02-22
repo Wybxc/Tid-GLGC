@@ -6,10 +6,10 @@
 			<Projects Include="GLGCMain.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="_Test_GLGC.dproj">
+			<Projects Include="..\Other\_Test_Futures.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="_Test_Futures.dproj">
+			<Projects Include="..\UnitTest\_Test_GLGC.dproj">
 				<Dependencies/>
 			</Projects>
 		</ItemGroup>
@@ -29,32 +29,32 @@
 		<Target Name="GLGCMain:Make">
 			<MSBuild Targets="Make" Projects="GLGCMain.dproj"/>
 		</Target>
-		<Target Name="_Test_GLGC">
-			<MSBuild Projects="_Test_GLGC.dproj"/>
-		</Target>
-		<Target Name="_Test_GLGC:Clean">
-			<MSBuild Targets="Clean" Projects="_Test_GLGC.dproj"/>
-		</Target>
-		<Target Name="_Test_GLGC:Make">
-			<MSBuild Targets="Make" Projects="_Test_GLGC.dproj"/>
-		</Target>
 		<Target Name="_Test_Futures">
-			<MSBuild Projects="_Test_Futures.dproj"/>
+			<MSBuild Projects="..\Other\_Test_Futures.dproj"/>
 		</Target>
 		<Target Name="_Test_Futures:Clean">
-			<MSBuild Targets="Clean" Projects="_Test_Futures.dproj"/>
+			<MSBuild Targets="Clean" Projects="..\Other\_Test_Futures.dproj"/>
 		</Target>
 		<Target Name="_Test_Futures:Make">
-			<MSBuild Targets="Make" Projects="_Test_Futures.dproj"/>
+			<MSBuild Targets="Make" Projects="..\Other\_Test_Futures.dproj"/>
+		</Target>
+		<Target Name="_Test_GLGC">
+			<MSBuild Projects="..\UnitTest\_Test_GLGC.dproj"/>
+		</Target>
+		<Target Name="_Test_GLGC:Clean">
+			<MSBuild Targets="Clean" Projects="..\UnitTest\_Test_GLGC.dproj"/>
+		</Target>
+		<Target Name="_Test_GLGC:Make">
+			<MSBuild Targets="Make" Projects="..\UnitTest\_Test_GLGC.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="GLGCMain;_Test_GLGC;_Test_Futures"/>
+			<CallTarget Targets="GLGCMain;_Test_Futures;_Test_GLGC"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="GLGCMain:Clean;_Test_GLGC:Clean;_Test_Futures:Clean"/>
+			<CallTarget Targets="GLGCMain:Clean;_Test_Futures:Clean;_Test_GLGC:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="GLGCMain:Make;_Test_GLGC:Make;_Test_Futures:Make"/>
+			<CallTarget Targets="GLGCMain:Make;_Test_Futures:Make;_Test_GLGC:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

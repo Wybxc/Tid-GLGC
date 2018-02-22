@@ -15,9 +15,9 @@ program _Test_GLGC;
 {$ENDIF}
 
 uses
-  DunitTestRunner,
-  _Test.TGCObjectList in '_Test\_Test.TGCObjectList.pas',
-  Tid.GCObject in 'Tid.GCObject.pas';
+  DUnitTestRunner,
+  _Test.TGCObjectList in '_Test.TGCObjectList.pas',
+  Tid.GCObject in '..\Tid.GCObject.pas';
 
 {$R *.RES}
 

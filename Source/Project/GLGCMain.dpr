@@ -5,7 +5,7 @@ program GLGCMain;
 
 uses
   System.SysUtils,
-  Tid.GCObject in 'Tid.GCObject.pas';
+  Tid.GCObject in '..\Tid.GCObject.pas';
 
 begin
   ReportMemoryLeaksOnShutdown := True;
