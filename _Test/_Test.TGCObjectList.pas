@@ -30,6 +30,15 @@ type
     procedure TestIsEmpty;
   end;
 
+  TestGCObject = class(TTestCase)
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestGC1;
+    procedure TestGC2;
+  end;
+
 implementation
 
 procedure TestTGCObjectList.SetUp;
@@ -64,7 +73,6 @@ begin
   CheckFalse(FGCObjectList.IsEmpty);
   FGCObjectList.Clear;
   CheckTrue(FGCObjectList.IsEmpty);
-
 end;
 
 procedure TestTGCObjectList.TestDelete;
@@ -77,7 +85,6 @@ begin
   CheckFalse(FGCObjectList.IsEmpty);
   FGCObjectList.Delete(Obj);
   CheckTrue(FGCObjectList.IsEmpty);
-
 end;
 
 procedure TestTGCObjectList.TestIsEmpty;
@@ -94,9 +101,45 @@ begin
   CheckTrue(FGCObjectList.IsEmpty);
 end;
 
+{ TestGCObject }
+
+procedure TestGCObject.SetUp;
+begin
+end;
+
+procedure TestGCObject.TearDown;
+begin
+  TGCObject.GCManager.GarbageCollect;
+end;
+
+procedure TestGCObject.TestGC1;
+const
+  num = 10000;
+var
+  i: Integer;
+begin
+  for i := 1 to num do
+    TGCObject.Create(nil);
+end;
+
+procedure TestGCObject.TestGC2;
+var
+  a, b, c, d: TGCTableObject;
+begin
+  a := TGCTableObject.Create(TGCTableObject.Create(TGCTableObject.Create(nil)));
+  b := TGCTableObject.Create(TGCTableObject.Create(nil));
+  a.GCRefObjects.Add(b);
+  c := TGCTableObject.Create(a);
+  b.GCRefObjects.Add(c);
+  d := TGCRoot.Create;
+  TGCTableObject.Create(d);
+  b.GCRefObjects.Add(TGCTableObject.Create(d));
+  TGCObject.GCManager.GCRoots.Delete(d);
+end;
+
 initialization
-  // Register any test cases with the test runner
   RegisterTest(TestTGCObjectList.Suite);
+  RegisterTest(TestGCObject.Suite);
 
 end.
 

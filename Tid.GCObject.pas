@@ -5,6 +5,8 @@
 {    作者: 忘忧北萱草                                                          }
 {    Github 主页: https://github.com/Wybxc/Tid-GLGC                            }
 {                                                                              }
+{    版本: v1.0.0                                                              }
+{                                                                              }
 {    Licence: GNU Lesser General Public License v3.0 (LGPLv3)                  }
 {                                                                              }
 {    术语解释:                                                                 }
@@ -15,7 +17,8 @@
 {                       用于垃圾回收中标记可达对象.                            }
 {       5) GC根/GCRoot: 在垃圾回收时的默认可达对象.                            }
 {       6) 公有GC根:    默认的 GCRoot                                          }
-{       7) (*friend*):  表示此 private/protected 内的成员是友元属性.           }
+{       7) (*friend*):  表示此 private/protected 内的成员可以被本单元的其他对象}
+{                       访问.                                                  }
 {       8) 析构器:      指 TGCObject.Finalize.                                 }
 {------------------------------------------------------------------------------}
 
@@ -64,6 +67,10 @@ type                                                                            
     { 注意到没有取消标记的方法, 因为这里用了一个神奇的小方法.
       在这一次检测时, 把 GCMark 最后一位为 1 记作被标记, 那么下一次只要反转 MarkFlag,
       检测就会变为 GCMark 最后一位为 0 记作被标记. }
+  {$IFDEF DEBUG}
+  public
+    Name: string;
+  {$ENDIF}
   strict protected // 子对象支持:
     function GetGCRefObjects: TGCObjectList; virtual;
   protected (*friend*) // 需拓展/抽象方法:
@@ -96,13 +103,13 @@ type                                                                            
   strict protected
     FObjects: TGCObjectList;
     function GetGCRefObjects: TGCObjectList; override;
-  protected
-    constructor Create(AOwner: TGCObject);
+  public
+    constructor Create(Owner: TGCObject);
     procedure Finalize; override;
   end;
 
   /// <remarks>公有GC根.</remarks>
-  TGlobalGCRoot = class(TGCTableObject)
+  TGCRoot = class(TGCTableObject)
     constructor Create;
   end;
 
@@ -133,6 +140,8 @@ type                                                                            
     procedure GCFree;
   end;
 
+function GCManager: TGCManager; inline;
+
 implementation
 
 uses
@@ -141,6 +150,11 @@ uses
 type
   EGCUnit = class(Exception)
   end;
+
+function GCManager: TGCManager; inline;
+begin
+  Result := TGCObject.GCManager;
+end;
 
 { TGCObject }
 
@@ -163,6 +177,10 @@ begin
   GCManager.GCObjects.Add(Self);
 
   GCMark := not MarkFlag;
+
+  {$IFDEF DEBUG}
+  Name := ClassName;
+  {$ENDIF}
 end;
 
 class constructor TGCObject.CreateGCManager;
@@ -171,7 +189,7 @@ begin
   TGCObject.GCManager := TGCManager.Create;
   TGCObject.MarkFlag := $01;
   // 初始化公有GC根.
-  TGCObject.GlobalGCRoot := TGlobalGCRoot.Create;
+  TGCObject.GlobalGCRoot := TGCRoot.Create;
   TGCObject.GCManager.AddRoot(TGCObject.GlobalGCRoot);
 end;
 
@@ -236,6 +254,8 @@ destructor TGCManager.Destroy;
 begin
   GarbageCollect;
   FreeObjects(GCObjects);
+  GCObjects.Free;
+  GCRoots.Free;
   inherited;
 end;
 
@@ -251,15 +271,15 @@ class procedure TGCManager.FreeObjects(Objects: TGCObjectList);
     Deleted: TGCObjectList;
   begin
     Result := True;
-    // 标记所有被引用的对象
+    // 标记所有被引用的对象.
     Objects.GCMarkRefObjects;
-    // 检查未标记的对象
+    // 检查未标记的对象.
     Deleted := Objects.GCExtractObjects(False);
-    if Deleted.IsEmpty then
-      Exit(False);
-    // 释放
-    Deleted.GCFinalize;
-    Deleted.GCFree;
+    if not Deleted.IsEmpty then
+      // 释放.
+      Deleted.GCFree
+    else
+      Result := False;
     Deleted.Free;
   end;
 
@@ -296,9 +316,9 @@ end;
 
 { TGCTableObject }
 
-constructor TGCTableObject.Create(AOwner: TGCObject);
+constructor TGCTableObject.Create(Owner: TGCObject);
 begin
-  inherited;
+  inherited Create(Owner);
   FObjects := TGCObjectList.Create;
 end;
 
@@ -358,7 +378,10 @@ end;
 
 destructor TGCObjectList.Destroy;
 begin
+  // 节点释放.
   Clear;
+  // 释放 Head.
+  Dispose(Head);
   inherited;
 end;
 
@@ -369,11 +392,11 @@ begin
   // p: 当前访问节点的上一个节点.
   // q: 当前访问节点.
   p := Head;
-  q := p^.Next;
   Result := TGCObjectList.Create;
-  while q <> nil do
+  while Assigned(p^.Next) do
   begin
-    if not (q^.Data.IsMarked xor Marked) then
+    q := p^.Next;
+    if (q^.Data.IsMarked <> False) = Marked then
     begin
       // 将 q 从链表中断开.
       p^.Next := q^.Next;
@@ -384,10 +407,10 @@ begin
       // 自动 Finalize.
       if AutoFinalize then
         q^.Data.Finalize;
-    end;
-    // 下一个.
-    p := p^.Next;
-    q := p^.Next;
+    end
+    else
+      // 下一个
+      p := p^.Next;
   end;
 end;
 
@@ -408,13 +431,18 @@ procedure TGCObjectList.GCFree;
 var
   p: PNode;
 begin
-  // p: 当前访问的节点.
-  p := Head^.Next;
-  while p <> nil do
+  // p: 当前访问节点.
+  while Assigned(Head^.Next) do
   begin
+    p := Head^.Next;
+    // 将 p 从链表中断开.
+    Head^.Next := p^.Next;
+    // 释放.
     p^.Data.Free;
-    p := p^.Next;
+    Dispose(p);
   end;
+  // 维护 Tail.
+  Tail := Head;
 end;
 
 procedure TGCObjectList.GCMarkAllObjects;
@@ -498,10 +526,17 @@ end;
 
 { TGlobalGCRoot }
 
-constructor TGlobalGCRoot.Create;
+constructor TGCRoot.Create;
 begin
+  // 初始化子对象列表.
   FObjects := TGCObjectList.Create;
+  // 交由 GCManager 管理.
+  GCManager.GCObjects.Add(Self);
+  // 初始化 GCMark.
   GCMark := not MarkFlag;
+  {$IFDEF DEBUG}
+  Name := ClassName;
+  {$ENDIF}
 end;
 
 end.
