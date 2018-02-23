@@ -109,7 +109,7 @@ end;
 
 procedure TestGCObject.TearDown;
 begin
-  TGCObject.GCManager.GarbageCollect;
+  TGCObject.GCManager.GarbageCollectFull;
 end;
 
 procedure TestGCObject.TestGC1;
@@ -131,7 +131,7 @@ begin
   a.GCRefObjects.Add(b);
   c := TGCTableObject.Create(a);
   b.GCRefObjects.Add(c);
-  d := TGCRoot.Create;
+  d := TGCRootObject.Create;
   TGCTableObject.Create(d);
   b.GCRefObjects.Add(TGCTableObject.Create(d));
   TGCObject.GCManager.GCRoots.Delete(d);

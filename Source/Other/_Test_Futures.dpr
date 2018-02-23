@@ -62,9 +62,6 @@ end;
 //    RaiseLastOSError;
 //end;
 
-var
-  p: Pointer;
-
 const
   GCMark = 255;
   MarkFlag = 254;
@@ -76,7 +73,6 @@ begin
     Writeln(TObject.InstanceSize);
     Writeln(TLiteClass.InstanceSize);
     Writeln(TMyClass.InstanceSize);
-    Writeln(not Boolean((GCMark xor MarkFlag) or MarkMask));
 //    Writeln(Format('New Instance in %p', [Pointer(@TLiteClass.NewInstance)]));
 //    SetLength(Arr, 100000);
 //    for i := Low(Arr) to High(Arr) do
