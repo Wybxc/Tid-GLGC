@@ -4,7 +4,7 @@
 
 ## 使用方法
 
-在单元的 uses 区中加入 Tid.GCObject 单元，声明 TGCObject 的子类，子类的实例就会被自动内存管理。注意：不能手动释放一个 TGCObject 类型的量。
+在单元的 `uses` 区中加入 `Tid.GCObject` 单元，声明 `TGCObject` 的子类，子类的实例就会被自动内存管理。注意：不能手动释放一个 `TGCObject` 类型的量。
 
 ```Delphi
 program Demo1;
@@ -47,7 +47,7 @@ begin
 end.
 ```
 
-在单元的 uses 区中加入 Tid.GCObject.SmartPointer 单元，就可以使用智能指针。
+在单元的 `uses` 区中加入 `Tid.GCObject.SmartPointer` 单元，就可以使用智能指针。
 
 ```Delphi
 program Demo2;
@@ -74,11 +74,12 @@ end.
 
 ## 更新日志
 
+### v1.1.0
+ - 智能指针支持，`TSmartPointer` 和 `P<T>` 类型。
+ - 增量式垃圾回收支持，自动垃圾回收支持。
+ - `TGCObject.LocalBegin` 和 `TGCObject.LocalEnd` 方法表示作用域。
+ 
 ### v1.0.0
- - 基本内容构建，包括 TGCObject 和 TGCManager 类型。
+ - 基本内容构建，包括 `TGCObject` 和 `TGCManager` 类型。
  - 手动垃圾回收，程序结束时垃圾回收。
  
-### v1.1.0
- - 智能指针支持，TSmartPointer 和 P<T> 类型。
- - 增量式垃圾回收支持，自动垃圾回收支持。
- - TGCObject.LocalBegin 和 TGCObject.LocalEnd 方法表示作用域。
