@@ -8,7 +8,9 @@
 
 ```Delphi
 program Demo1;
+
 uses Tid.GCObject;
+
 type TMyClass = class(TGCObject)
 protected
   procedure Finalize; override; // 析构器的代码写在这里
@@ -18,6 +20,7 @@ public
   AutoObj: TGCObject;
   constructor Create(Owner: TGCObject);
 end;
+
 constructor TMyClass.Create(Owner: TGCObject);
 begin
   inherited Create(Owner);
@@ -25,11 +28,13 @@ begin
   Obj := TObject.Create;
   AutoObj := TGCObject.Create;
 end;
+
 procedure TMyClass.Finalize; override;
 begin
   Obj.Free; // 类内部的非自动内存管理对象要在析构时释放
   // AutoObj 是自动内存管理对象, 不需要释放
 end;
+
 var
   MyObject: TMyClass;
 begin
@@ -46,7 +51,9 @@ end.
 
 ```Delphi
 program Demo2;
+
 uses System.SysUtils, Tid.GCObject.SmartPointer;
+
 var
   p1: TSmartPointer；// Pointer 类型的智能指针
   p2: P<Integer>; // ^Integer 类型的智能指针
