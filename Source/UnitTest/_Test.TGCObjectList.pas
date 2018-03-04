@@ -114,7 +114,7 @@ end;
 
 procedure TestGCObject.TestGC1;
 const
-  num = 10000;
+  num = 1;
 var
   i: Integer;
 begin
@@ -126,15 +126,15 @@ procedure TestGCObject.TestGC2;
 var
   a, b, c, d: TGCTableObject;
 begin
-  a := TGCTableObject.Create(TGCTableObject.Create(TGCTableObject.Create(nil)));
-  b := TGCTableObject.Create(TGCTableObject.Create(nil));
-  a.GCRefObjects.Add(b);
-  c := TGCTableObject.Create(a);
-  b.GCRefObjects.Add(c);
-  d := TGCRootObject.Create;
-  TGCTableObject.Create(d);
-  b.GCRefObjects.Add(TGCTableObject.Create(d));
-  TGCObject.GCManager.GCRoots.Delete(d);
+//  a := TGCTableObject.Create(TGCTableObject.Create(TGCTableObject.Create(nil)));
+//  b := TGCTableObject.Create(TGCTableObject.Create(nil));
+//  a.GCRefObjects.Add(b);
+//  c := TGCTableObject.Create(a);
+//  b.GCRefObjects.Add(c);
+//  d := TGCRootObject.Create;
+//  TGCTableObject.Create(d);
+//  b.GCRefObjects.Add(TGCTableObject.Create(d));
+//  TGCObject.GCManager.GCRoots.Delete(d);
 end;
 
 initialization

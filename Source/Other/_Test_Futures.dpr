@@ -50,46 +50,14 @@ begin
   Result := Data;
 end;
 
-//// 取得当前进程占用内存
-//function CurrentMemoryUsage: Cardinal;
-//var
-//  pmc: TProcessMemoryCounters;
-//begin
-//  pmc.cb := SizeOf(pmc);
-//  if GetProcessMemoryInfo(GetCurrentProcess, @pmc, SizeOf(pmc)) then
-//    Result := pmc.WorkingSetSize
-//  else
-//    RaiseLastOSError;
-//end;
-
-const
-  GCMark = 255;
-  MarkFlag = 254;
-  MarkMask = $FE;
+var
+  p: PChar;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
   try
-    Writeln(TObject.InstanceSize);
-    Writeln(TLiteClass.InstanceSize);
-    Writeln(TMyClass.InstanceSize);
-//    Writeln(Format('New Instance in %p', [Pointer(@TLiteClass.NewInstance)]));
-//    SetLength(Arr, 100000);
-//    for i := Low(Arr) to High(Arr) do
-//    begin
-//      Arr[i] := TMyClass.Create;
-//      Arr[i].Data := i;
-//      Arr[i].Next := Arr[i];
-//    end;
-//    Writeln(CurrentMemoryUsage);
-//    Writeln(Arr[0].ClassName);
-//    for i := Low(Arr) to High(Arr) do
-//    begin
-//      Assert(Arr[i].GetData = i);
-//      Assert(Arr[i].Next = Arr[i]);
-//    end;
-//    for i := Low(Arr) to High(Arr) do
-//      Arr[i].Free;
+    p := PChar('123456789');
+    Writeln((StrLen(p) + 1) * SizeOf(Char));
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

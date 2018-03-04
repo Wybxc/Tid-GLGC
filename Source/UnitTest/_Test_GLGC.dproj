@@ -84,7 +84,6 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="_Test.TGCObjectList.pas"/>
 			<DCCReference Include="..\Tid.GCObject.pas"/>
 			<DCCReference Include="_Test.SmartPointer.pas"/>
 			<DCCReference Include="..\Tid.GCObject.SmartPointer.pas"/>
