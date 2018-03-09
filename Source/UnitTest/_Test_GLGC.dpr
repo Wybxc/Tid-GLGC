@@ -18,12 +18,14 @@ uses
   DunitTestRunner,
   Winapi.Windows,
   Winapi.PsAPI,
-//  _Test.TGCObjectList in '_Test.TGCObjectList.pas',
   Tid.GCObject in '..\Tid.GCObject.pas',
   _Test.SmartPointer in '_Test.SmartPointer.pas',
   Tid.GCObject.SmartPointer in '..\Tid.GCObject.SmartPointer.pas',
   System.SysUtils,
-  _Test.TGCObject in '_Test.TGCObject.pas';
+  _Test.TGCObject in '_Test.TGCObject.pas',
+  _Test.GCString in '_Test.GCString.pas',
+  _Test.TGCObjectList in '_Test.TGCObjectList.pas',
+  Tid.GCObject.GCString in '..\Tid.GCObject.GCString.pas';
 
 {$R *.RES}
 

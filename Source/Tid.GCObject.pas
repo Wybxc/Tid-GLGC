@@ -16,7 +16,7 @@
 {       4) GC标记:      在 GCObject 中表示 GCObject 状态的 Byte 值. 其最后一位 }
 {                       用于垃圾回收中标记可达对象.                            }
 {       5) GC根/GCRoot: 在垃圾回收时的默认可达对象.                            }
-{       6) 公有GC根:    默认的 GCRoot                                          }
+{       6) 公有GC根:    默认的 GCRoot, 是 LocalGCRoots 的第一个元素.           }
 {       7) (*friend*):  表示此 private/protected 内的成员可以被本单元的其他对象}
 {                       访问.                                                  }
 {       8) 析构器:      指 TGCObject.Finalize.                                 }
@@ -84,14 +84,13 @@ type                                                                            
   public
     class var // GCManager 支持:
       GCManager: TGCManager;
-      GlobalGCRoot: TGCObject;
-      LocalGCRoot: TGCObjectList;
+      LocalGCRoots: TGCObjectList;
       GCStep, GCStepCount: Integer;
       MarkFlag: TGCMark;
     class constructor CreateGCManager;
     class destructor DestroyGCManager;
-    class function LocalBegin: TGCObject; inline;
-    class procedure LocalEnd; inline;
+    class function LocalBegin: TGCObject; inline; static;
+    class procedure LocalEnd; inline; static;
     // 公有方法:
     constructor Create(Owner: TGCObject);
     destructor Destroy; override; final;
@@ -160,26 +159,22 @@ type                                                                            
 
 function GCManager: TGCManager; inline;
 
-function Dispose(p: TGCObjectList.PNode): Boolean;
+procedure Dispose(var p: TGCObjectList.PNode);
 
 implementation
 
 uses
   System.SysUtils, System.Classes;
 
+procedure Dispose(var p: TGCObjectList.PNode);
+begin
+  System.Dispose(p);
+  p := nil;
+end;
+
 type
   EGCUnit = class(Exception)
   end;
-
-function Dispose(p: TGCObjectList.PNode): Boolean; // HOOK!
-begin
-  Writeln(Format('Dispose %p', [p]));
-  Result := p <> nil;
-  if Result then
-    System.Dispose(p)
-  else
-    raise Exception.Create('Try Dispose A Null Pointer!');
-end;
 
 function GCManager: TGCManager; inline;
 begin
@@ -194,7 +189,7 @@ var
 begin
   // 默认添加为公有GC根的子对象.
   if not Assigned(Owner) then
-    Owner := LocalGCRoot.Tail^.Data;
+    Owner := LocalGCRoots.Tail^.Data;
 
   // 添加为 Owner 的子对象.
   RefOfOwner := Owner.GCRefObjects;
@@ -209,17 +204,15 @@ end;
 class constructor TGCObject.CreateGCManager;
 begin
   // 初始化 GCManager.
-  TGCObject.GCManager := TGCManager.Create;
-  TGCObject.MarkFlag := $01;
-  // 初始化公有GC根.
-  TGCObject.GlobalGCRoot := TGCRootObject.Create;
-  TGCObject.GCManager.AddRoot(TGCObject.GlobalGCRoot);
+  GCManager := TGCManager.Create;
+  MarkFlag := $01;
   // 初始化局部GC根
-  TGCObject.LocalGCRoot := TGCObjectList.Create(False);
-  TGCObject.LocalGCRoot.Add(TGCObject.GlobalGCRoot);
+  LocalGCRoots := TGCObjectList.Create(False);
+  // 初始化公有GC根.
+  LocalBegin;
   // 初始化GC步长.
-  TGCObject.GCStep := 200;
-  TGCObject.GCStepCount := 0;
+  GCStep := 200;
+  GCStepCount := 0;
 end;
 
 destructor TGCObject.Destroy;
@@ -233,7 +226,12 @@ end;
 
 class destructor TGCObject.DestroyGCManager;
 begin
+  // 释放公有GC根.
+  LocalEnd;
+  // 释放内存管理器.
   TGCObject.GCManager.Free;
+  // 我 TM 当时怎么忘了写这一句.
+  LocalGCRoots.Free;
 end;
 
 procedure TGCObject.Finalize;
@@ -251,6 +249,11 @@ var
 
 procedure TGCObject.Init;
 begin
+  {$IFDEF DEBUG}
+  Inc(FC);
+  Name := ClassName + IntToStr(FC);
+  {$ENDIF}
+
   // 增量垃圾清理
   Inc(GCStepCount, GCStep);
   GCManager.GarbageCollectSteps;
@@ -260,14 +263,6 @@ begin
 
   GCMark := 0;
   SetMarked;
-
-  {$IFDEF DEBUG}
-  Inc(FC);
-  if FC = 7 then
-    Name := '$ 7 $'
-  else
-    Name := ClassName + IntToStr(FC);
-  {$ENDIF}
 end;
 
 function TGCObject.IsMarked: Boolean;
@@ -280,13 +275,12 @@ end;
 class function TGCObject.LocalBegin: TGCObject;
 begin
   Result := TGCRootObject.Create;
-  LocalGCRoot.Add(Result);
+  LocalGCRoots.Add(Result);
 end;
 
 class procedure TGCObject.LocalEnd;
 begin
-  GCManager.GCRoots.Delete(LocalGCRoot.Pop);
-  Assert(not LocalGCRoot.IsEmpty);
+  GCManager.GCRoots.Delete(LocalGCRoots.Pop);
 end;
 
 procedure TGCObject.SetMarked;
@@ -411,8 +405,6 @@ end;
 function TGCTableObject.GetGCRefObjects: TGCObjectList;
 begin
   Result := FObjects;
-  if Name = '$ 7 $' then
-    Writeln('#######Special 7!');
 end;
 
 {$REGION 'TGCObjectList'}
@@ -524,7 +516,6 @@ var
 begin
   // p: 第一个节点.
   p := Head^.Next;
-  Assert(p <> Head);
   if Assigned(p) then
   begin
     Result := p^.Data;
@@ -533,6 +524,7 @@ begin
       Tail := Head;
     // 释放.
     Head^.Next := p^.Next;
+    Assert(p <> Head);
     Dispose(p);
   end
   else
@@ -546,8 +538,8 @@ begin
   // p: 当前访问节点的上一个节点.
   // q: 当前访问节点.
   p := Head;
-  Result := TGCObjectList.Create(True);
-  while Assigned(p^.Next) do
+  Result := TGCObjectList.Create(False);
+  while p <> Tail do
   begin
     q := p^.Next;
     if (q^.Data.IsMarked <> False) = Marked then
@@ -672,7 +664,8 @@ begin
   FObjects := TGCObjectList.Create(True);
   Init;
   GCManager.GCRoots.Add(Self);
-  GCManager.GCObjects.Add(Self);
+  // 在 Init 方法中已经加入 GCObjects
+  // GCManager.GCObjects.Add(Self);
 end;
 
 end.

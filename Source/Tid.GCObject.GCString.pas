@@ -11,7 +11,7 @@
 {                                                                              }
 {    为什么要有这个单元:                                                       }
 {        Delphi 的 string 本身就有引用计数的内存管理, 本来不需要额外的内存管理.}
-{      但是 string 不能用在 record 的 case 部分, 就像这样:                     }
+{    但是 string 不能用在 record 的 case 部分, 就像这样:                       }
 {           type r = record                                                    }
 {             case Byte of                                                     }
 {              0:(a:string;);                                                  }
@@ -42,11 +42,22 @@ type
     FStr: TStringObject;
     function GetStr: string; inline;
     procedure SetStr(const Value: string); inline;
-    function GetChars(const Index: Integer): Char; inline;
-    procedure SetChars(const Index: Integer; const Value: Char); inline;
+    function GetChars(const index: Integer): Char; inline;
+    procedure SetChars(const index: Integer; const Value: Char); inline;
   public
     property Str: string read GetStr write SetStr;
-    property Chars[const Index: Integer]: Char read GetChars write SetChars; Default;
+    property Chars[const index: Integer]: Char read GetChars write SetChars; Default;
+    {$REGION 'Operator Overload'}
+    class operator Implicit(const s: string): TGCString; overload; inline;
+    class operator Implicit(const s: TGCString): string; overload; inline;
+    class operator Equal(const a, b: TGCString): Boolean; inline;
+    class operator NotEqual(const a, b: TGCString): Boolean; inline;
+    class operator GreaterThan(const a, b: TGCString): Boolean; inline;
+    class operator GreaterThanOrEqual(const a, b: TGCString): Boolean; inline;
+    class operator LessThan(const a, b: TGCString): Boolean; inline;
+    class operator LessThanOrEqual(const a, b: TGCString): Boolean; inline;
+    class operator Add(const a, b: TGCString): string; inline;
+    {$ENDREGION}
   end;
 
 implementation
@@ -64,6 +75,16 @@ end;
 
 { TGCString }
 
+class operator TGCString.Add(const a, b: TGCString): string;
+begin
+  Result := a.Str + b.Str;
+end;
+
+class operator TGCString.Equal(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str = b.Str;
+end;
+
 function TGCString.GetChars(const Index: Integer): Char;
 begin
   Result := Str[Index];
@@ -71,7 +92,45 @@ end;
 
 function TGCString.GetStr: string;
 begin
+  if not Assigned(FStr) then
+    FStr := TStringObject.Create('');
   Result := FStr.Str;
+end;
+
+class operator TGCString.GreaterThan(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str > b.Str;
+end;
+
+class operator TGCString.GreaterThanOrEqual(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str >= b.Str;
+end;
+
+class operator TGCString.Implicit(const s: string): TGCString;
+begin
+  inherited;
+  Result.Str := s;
+end;
+
+class operator TGCString.Implicit(const s: TGCString): string;
+begin
+  Result := s.Str;
+end;
+
+class operator TGCString.LessThan(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str < b.Str;
+end;
+
+class operator TGCString.LessThanOrEqual(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str <= b.Str;
+end;
+
+class operator TGCString.NotEqual(const a, b: TGCString): Boolean;
+begin
+  Result := a.Str <> b.Str;
 end;
 
 procedure TGCString.SetChars(const Index: Integer; const Value: Char);
@@ -81,7 +140,7 @@ end;
 
 procedure TGCString.SetStr(const Value: string);
 begin
-  FStr.Str := Value;
+  FStr := TStringObject.Create(Value);
 end;
 
 end.

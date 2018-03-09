@@ -56,7 +56,7 @@ var
   Arr: TGCObjects;
   i: Integer;
 begin
-  SetLength(Arr, 1);
+  SetLength(Arr, 10000);
   Arr[0] := TGCObject.LocalBegin;
   begin
     for i := 1 to High(Arr) do
@@ -69,7 +69,7 @@ procedure TestGC.TestGCs;
 var
   i: Integer;
 begin
-  for i := 1 to 1 do
+  for i := 1 to 10 do
     TestGC;
 end;
 
