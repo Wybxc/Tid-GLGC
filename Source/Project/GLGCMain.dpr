@@ -31,7 +31,7 @@ uses
 begin
   ReportMemoryLeaksOnShutdown := True;
   try
-    Writeln('GLGC Ver 1.1');
+    Writeln('GLGC Ver 1.1.1');
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
