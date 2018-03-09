@@ -74,12 +74,17 @@ end.
 
 ## 更新日志
 
+### v1.1.1
+ - 封装了`TGCString`。
+ - `TGCObject.LocalBegin`和`TGCObject.LocalEnd`可以嵌套调用了。
+ - 移除了`TGCObject.GlobalGCRoot`
+
 ### v1.1.0
- - 智能指针支持，`TSmartPointer` 和 `P<T>` 类型。
+ - 智能指针支持，`TSmartPointer`和`P<T>`类型。
  - 增量式垃圾回收支持，自动垃圾回收支持。
- - `TGCObject.LocalBegin` 和 `TGCObject.LocalEnd` 方法表示作用域。
+ - `TGCObject.LocalBegin`和`TGCObject.LocalEnd`方法表示作用域。
  
 ### v1.0.0
- - 基本内容构建，包括 `TGCObject` 和 `TGCManager` 类型。
+ - 基本内容构建，包括`TGCObject`和`TGCManager`类型。
  - 手动垃圾回收，程序结束时垃圾回收。
  
