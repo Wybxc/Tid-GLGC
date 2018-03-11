@@ -51,13 +51,14 @@ begin
 end;
 
 var
-  p: PChar;
+  s: string;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
   try
-    p := PChar('123456789');
-    Writeln((StrLen(p) + 1) * SizeOf(Char));
+    s := '123456789';
+    Writeln(s[1]);
+    Writeln(Length(s));
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

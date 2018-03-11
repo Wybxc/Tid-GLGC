@@ -35,6 +35,7 @@ type
   published
     procedure TestGC;
     procedure TestGCs;
+    procedure TestHashCode;
   end;
 
 implementation
@@ -71,6 +72,13 @@ var
 begin
   for i := 1 to 10 do
     TestGC;
+end;
+
+procedure TestGC.TestHashCode;
+begin
+  LocalBegin;
+  CheckNotEquals(TGCUnitObject.Create.GetHashCode, TGCUnitObject.Create.GetHashCode);
+  LocalEnd;
 end;
 
 initialization

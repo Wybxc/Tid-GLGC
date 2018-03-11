@@ -5,7 +5,7 @@
 {    作者: 忘忧北萱草                                                          }
 {    Github 主页: https://github.com/Wybxc/Tid-GLGC                            }
 {                                                                              }
-{    版本: v1.1.0 dev 0223                                                     }
+{    版本: v1.1.1 dev 0310                                                     }
 {                                                                              }
 {    Licence: GNU Lesser General Public License v3.0 (LGPLv3)                  }
 {                                                                              }

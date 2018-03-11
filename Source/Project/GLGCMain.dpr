@@ -26,7 +26,8 @@ uses
   System.SysUtils,
   Tid.GCObject in '..\Tid.GCObject.pas',
   Tid.GCObject.SmartPointer in '..\Tid.GCObject.SmartPointer.pas',
-  Tid.GCObject.GCString in '..\Tid.GCObject.GCString.pas';
+  Tid.GCObject.GCString in '..\Tid.GCObject.GCString.pas',
+  Tid.GCObject.Classes in '..\Tid.GCObject.Classes.pas';
 
 begin
   ReportMemoryLeaksOnShutdown := True;

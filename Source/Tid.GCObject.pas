@@ -5,7 +5,7 @@
 {    作者: 忘忧北萱草                                                          }
 {    Github 主页: https://github.com/Wybxc/Tid-GLGC                            }
 {                                                                              }
-{    版本: v1.1.0 dev 0223                                                     }
+{    版本: v1.1.1 dev 0310                                                     }
 {                                                                              }
 {    Licence: GNU Lesser General Public License v3.0 (LGPLv3)                  }
 {                                                                              }
@@ -69,7 +69,7 @@ type                                                                            
     { 注意到没有取消标记的方法, 因为这里用了一个神奇的小方法.
       在这一次检测时, 把 GCMark 最后一位为 1 记作被标记, 那么下一次只要反转 MarkFlag,
       检测就会变为 GCMark 最后一位为 0 记作被标记. }
-    procedure Init; // inline;
+    procedure Init; {$IFNDEF DEBUG} inline;{$ENDIF}
   {$IFDEF DEBUG}
   public
     Name: string;
@@ -94,6 +94,7 @@ type                                                                            
     // 公有方法:
     constructor Create(Owner: TGCObject);
     destructor Destroy; override; final;
+    function GetHashCode: Integer; override;
     /// <summary> 子对象列表. </summary>
     property GCRefObjects: TGCObjectList read GetGCRefObjects;
   end;
@@ -129,7 +130,7 @@ type                                                                            
         Data: TGCObject;
         Next: PNode;
       end;
-  private {friend}                                                                      {*)}
+  private {friend}                                                              {*)}
     DisableListen: Boolean;
     {$IFDEF DEBUG}
     ID: Integer;
@@ -159,18 +160,14 @@ type                                                                            
 
 function GCManager: TGCManager; inline;
 
-procedure Dispose(var p: TGCObjectList.PNode);
+function LocalBegin: TGCObject; inline;
+
+procedure LocalEnd; inline;
 
 implementation
 
 uses
   System.SysUtils, System.Classes;
-
-procedure Dispose(var p: TGCObjectList.PNode);
-begin
-  System.Dispose(p);
-  p := nil;
-end;
 
 type
   EGCUnit = class(Exception)
@@ -179,6 +176,16 @@ type
 function GCManager: TGCManager; inline;
 begin
   Result := TGCObject.GCManager;
+end;
+
+function LocalBegin: TGCObject; inline;
+begin
+  Result := TGCObject.LocalBegin;
+end;
+
+procedure LocalEnd; inline;
+begin
+  TGCObject.LocalEnd;
 end;
 
 { TGCObject }
@@ -230,7 +237,7 @@ begin
   LocalEnd;
   // 释放内存管理器.
   TGCObject.GCManager.Free;
-  // 我 TM 当时怎么忘了写这一句.
+  // 我 TM 当时怎么忘了写这一句...
   LocalGCRoots.Free;
 end;
 
@@ -244,8 +251,23 @@ begin
   Result := nil;
 end;
 
+function TGCObject.GetHashCode: Integer;
+const
+  magic = 131;
+var
+  i: Integer;
+  arr: PByteArray;
+begin
+  Result := NativeInt(Self);
+  arr := Pointer(Self);
+  for i := 0 to InstanceSize - 1 do
+    Result := Result * magic + arr[InstanceSize - i - 1];
+end;
+
+{$IFDEF DEBUG}
 var
   FC: Integer = 0;
+{$ENDIF}
 
 procedure TGCObject.Init;
 begin
